@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "core-js": "^2.6.5",
+    "validator": "^11.1.0",
     "vue": "^2.6.10",
     "vuetify": "^2.0.0",
     "web3": "^1.2.1"

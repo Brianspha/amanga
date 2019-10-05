@@ -46,6 +46,7 @@
   import Swal from 'sweetalert2'
   import loading from 'vue-loading-overlay';
   import 'vue-loading-overlay/dist/vue-loading.css';
+import isURL from 'validator/lib/isURL';
   export default {
     name: 'app',
     components:{
@@ -60,10 +61,10 @@
         urlRules: [
 
         ],
-        web3: new Web3(new Web3.providers.HttpProvider('http://localhost:11003')),
-        abi:[{"constant":true,"inputs":[{"name":"url","type":"bytes"}],"name":"check_reached_max_votes","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function","signature":"0x10b8823c"},{"constant":true,"inputs":[{"name":"url","type":"bytes"}],"name":"is_url_reported","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function","signature":"0x16f3b1ca"},{"constant":false,"inputs":[{"name":"url","type":"bytes"},{"name":"reason","type":"bytes32"},{"name":"user","type":"address"}],"name":"report_url","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function","signature":"0x415e757c"},{"constant":true,"inputs":[],"name":"get_min_token_payout","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function","signature":"0x5189a954"},{"constant":true,"inputs":[{"name":"url","type":"bytes"}],"name":"get_url_details","outputs":[{"name":"","type":"address"},{"name":"","type":"uint256"},{"name":"","type":"uint256"},{"name":"","type":"uint256"},{"name":"","type":"uint256"},{"name":"","type":"bytes32"}],"payable":false,"stateMutability":"view","type":"function","signature":"0x6a6c5d90"},{"constant":true,"inputs":[],"name":"get_urls_reported_keys","outputs":[{"name":"","type":"bytes[]"}],"payable":false,"stateMutability":"view","type":"function","signature":"0x7094e402"},{"constant":false,"inputs":[{"name":"url","type":"bytes"},{"name":"up_down_vote","type":"uint256"},{"name":"user","type":"address"}],"name":"up_down_vote_url","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function","signature":"0x751c9c56"},{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor","signature":"constructor"}],    amangaContract: {},
-        contractAddress: '0x638c4a669FdC0ab3fB2Dd7FDADc1B94CE1A868F7',
-        relayAddress:"0xae3478f55ae21b9139652467d0b73177d6bec204"
+        web3: new Web3(new Web3.providers.HttpProvider('ropsten.infura.io/v3/1ff323953d2a4cd1ac1cea6ab59a04f5')),
+        abi:[{"constant":true,"inputs":[{"name":"url","type":"bytes"}],"name":"check_reached_max_votes","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function","signature":"0x10b8823c"},{"constant":true,"inputs":[{"name":"url","type":"bytes"}],"name":"is_url_reported","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function","signature":"0x16f3b1ca"},{"constant":false,"inputs":[{"name":"url","type":"bytes"},{"name":"reason","type":"bytes32"},{"name":"user","type":"address"}],"name":"report_url","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function","signature":"0x415e757c"},{"constant":true,"inputs":[],"name":"get_min_token_payout","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function","signature":"0x5189a954"},{"constant":true,"inputs":[{"name":"url","type":"bytes"}],"name":"get_url_details","outputs":[{"name":"","type":"address"},{"name":"","type":"uint256"},{"name":"","type":"uint256"},{"name":"","type":"bytes"},{"name":"","type":"uint256"},{"name":"","type":"bytes32"}],"payable":false,"stateMutability":"view","type":"function","signature":"0x6a6c5d90"},{"constant":true,"inputs":[],"name":"get_urls_reported_keys","outputs":[{"name":"","type":"bytes[]"}],"payable":false,"stateMutability":"view","type":"function","signature":"0x7094e402"},{"constant":false,"inputs":[{"name":"url","type":"bytes"},{"name":"up_down_vote","type":"uint256"},{"name":"user","type":"address"}],"name":"up_down_vote_url","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function","signature":"0x751c9c56"},{"constant":false,"inputs":[{"name":"url","type":"bytes"},{"name":"thash","type":"bytes"}],"name":"save_url_thash","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function","signature":"0xa0c9a727"},{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor","signature":"constructor"}],
+        contractAddress: '0x524485B221384FAe96653037BB68b426601644fb',
+        relayAddress:"0xAD5C6964b5836d67Aa8c02b6Dd56DFa385F9B992"
       }
     },
     mounted() {
@@ -78,7 +79,7 @@
         this.selected = event.target.value
       },
       submitURL: async function () {
-        if(this.web3.utils.isAddress(this.eth_address)){
+        if(this.web3.utils.isAddress(this.eth_address) || isURL(this.url)){
         this.isLoading=true
         console.log(this.selected)
         console.log(this.url)
@@ -87,20 +88,30 @@
         let This=this
         this.amangaContract.methods.report_url(url, reason,This.eth_address).send({
           gas: 8000000,
-          from: this.relayAddress
+          from: This.relayAddress
         }).then((receipt, err) => {
           console.log('receipt:\n', receipt)
           if(!err){
-            This.success('Successfully reported url')
+            This.amangaContract.methods.save_url_thash(url, receipt.transactionHash).send({
+            gas: 8000000,
+            from: This.relayAddress
+        }).then((receipt,err)=>{
+          if(!err){
+          This.success('Successfully reported url')
           }
-          This.isLoading=false
+           This.isLoading=false
+        }).catch((err)=>{
+          console.log('error saving thash: ',err)
+        })
+          }
+         
         }).catch((err) => {
           This.isLoading=false
           console.log('something went wrong: ', err)
         })
       }
       else{
-        this.error("Invaid ethereum address")
+        this.error("Invaid ethereum address and or url")
       }
       },
       success(message) {

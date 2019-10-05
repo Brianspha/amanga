@@ -1,11 +1,11 @@
-pragma solidity >= 0.5.0;
+pragma solidity >= 0.5 .0;
 pragma experimental ABIEncoderV2;
 
 /**==================================import external contracts section ==================================*/
 
 import "./SafeMath.sol";
 
-contract Amanga  {
+contract Amanga {
     using SafeMath
     for uint256;
     /**==================================modifier definition section ==================================*/
@@ -23,6 +23,7 @@ contract Amanga  {
         uint256 down_votes;
         uint256 reported_times;
         uint date;
+        bytes thash;
         bool active;
     }
     struct Reporter {
@@ -62,7 +63,7 @@ contract Amanga  {
 
     }
     /**==================================url reports function definition section ==================================*/
-    function report_url(bytes memory url, bytes32 reason,address user) public returns(bool) {
+    function report_url(bytes memory url, bytes32 reason, address user) public returns(bool) {
         require(user != address(0), "invalid sender address");
         if (!reporters[user].active) {
             register_reporter(user);
@@ -83,7 +84,13 @@ contract Amanga  {
         return true;
     }
 
-    function up_down_vote_url(bytes memory url, uint up_down_vote,address user) public returns(bool) {
+    function save_url_thash(bytes memory url, bytes memory thash) public returns(bool) {
+        require(reported_urls[url].active, "url not reported");
+        reported_urls[url].thash = thash;
+
+    }
+
+    function up_down_vote_url(bytes memory url, uint up_down_vote, address user) public returns(bool) {
         require(user != address(0), "invalid sender address");
         require(reported_urls[url].active, "url not reported");
         require(reported_urls[url].reporter != user, "url reporter not allowed to up or down vote");
@@ -119,8 +126,8 @@ contract Amanga  {
         return urls_reported;
     }
 
-    function get_url_details(bytes memory url) public view returns(address, uint256, uint256, uint256, uint, bytes32) {
-        return (reported_urls[url].reporter, reported_urls[url].up_votes, reported_urls[url].down_votes, reported_urls[url].reported_times, reported_urls[url].date, reported_urls[url].reason);
+    function get_url_details(bytes memory url) public view returns(address, uint256, uint256, bytes memory, uint, bytes32) {
+        return (reported_urls[url].reporter, reported_urls[url].up_votes, reported_urls[url].down_votes, reported_urls[url].thash, reported_urls[url].date, reported_urls[url].reason);
     }
     /**==================================contract owner function definition section ==================================*/
     function get_min_token_payout() public only_owner view returns(uint256) {
