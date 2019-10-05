@@ -1,39 +1,18 @@
 module.exports = {
     default: {
         deployment: {
-            host: "ropsten.infura.io/v3/1ff323953d2a4cd1ac1cea6ab59a04f5",
-            port: false,
-            protocol: 'https',
-            type: "rpc",
-            accounts: [{
-            mnemonic: 'merry core shrug element key enough ski pigeon toilet addict zone brass',
-            addressIndex: "0", // Optional. The index to start getting the address
-            numAddresses: "10"
-      }]
+            host: "localhost",
+            port: 12000,
+            protocol: 'ws',
+            type: "ws",
         },
         gas: "8000000",
         contracts: {
             ERC20Detailed: {
-                args:[
-                    "AToken",
-                    "AT",
-                    18,
-                    2000000000
-                ],
-                gasPrice: 1200
+                address: '0x0ee7110d91a23e6d5aab6f178249803158d23f71',
             },
             Amanga: {
-                args: [
-                ],
-                gasPrice:1200
-            },
-            SafeMath:{
-                args:[],
-                gasPrice:1200
-            },
-            Roles:{
-                args:[],
-                gasPrice:1200
+                address: '0x41acc439c4a79940cc2d2ba419c35ed30dd87e66'
             }
 
         }
