@@ -1,0 +1,10 @@
+{
+    "manifest_version": 2,
+    "name": "amangaExtension",
+    "description": "Fake news repo",
+    "version": "2",
+    "options_page": "options.html",
+    "browser_action": {
+        "default_popup": "popup.html"
+    }
+}
